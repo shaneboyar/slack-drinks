@@ -3,21 +3,39 @@ require 'httparty'
 require 'json'
 
 post '/gateway' do
-  "#{params}"
-  # message = params[:text].gsub(params[:trigger_word], '').strip
-
-  # action, repo = message.split('_').map {|c| c.strip.downcase }
-  # repo_url = "https://api.github.com/repos/#{repo}"
-
-  # case action
-  #   when 'issues'
-  #     resp = HTTParty.get(repo_url)
-  #     resp = JSON.parse resp.body
-  #     respond_message "There are #{resp['open_issues_count']} open issues on #{repo}"
-  # end
+  content_type :json
+  {
+    response_type: "in_channel",
+    text: "You wanna get drinks #{params[:text]}?",
+    attachments: [
+      {
+        callback_id: "accept_response",
+        attachment_type: "default",
+        actions: [
+          {
+            "name": "accept_response",
+            "text": "Yep",
+            "type": "button",
+            "value": 'yes'
+          },
+          {
+            "name": "accept_response",
+            "text": "Nah",
+            "type": "button",
+            "value": 'no'
+          }
+        ]
+      }
+    ]
+  }.to_json
 end
 
-def respond_message message
+post '/actions-endpoint' do
   content_type :json
-  {:text => message}.to_json
+  response = JSON.parse(params[:payload])["actions"][0]["value"]
+  case JSON.parse(params[:payload])["actions"][0]["name"]
+  when 'accept_response'
+    response == "yes" ? 'Cool' : "Boo, you whore."
+  else "That hasn't been programmed yet."
+  end
 end
