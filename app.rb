@@ -4,6 +4,7 @@ require 'json'
 
 post '/gateway' do
   puts "********#{params}**************"
+  'put this in your pipe in smoke it!'
   # message = params[:text].gsub(params[:trigger_word], '').strip
 
   # action, repo = message.split('_').map {|c| c.strip.downcase }
