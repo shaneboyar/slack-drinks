@@ -4,30 +4,43 @@ require 'json'
 
 post '/gateway' do
   content_type :json
-  {
-    response_type: "in_channel",
-    text: "You wanna get drinks #{params[:text]}?",
-    attachments: [
-      {
-        callback_id: "accept_response",
-        attachment_type: "default",
-        actions: [
-          {
-            "name": "accept_response",
-            "text": "Yep",
-            "type": "button",
-            "value": 'yes'
-          },
-          {
-            "name": "accept_response",
-            "text": "Nah",
-            "type": "button",
-            "value": 'no'
-          }
-        ]
-      }
-    ]
-  }.to_json
+  case params[:text]
+  when 'help'
+    {
+      response_type: "ephemeral",
+      text: "How to use /drinks",
+      attachments: [
+        {
+          text: "To start planning drinks type `/drinks` followed by when you'd like to get drinks (e.g. `/drinks tonight` or `/drinks this friday`"
+        }
+      ]
+    }.to_json
+  else
+    {
+      response_type: "in_channel",
+      text: "You wanna get drinks #{params[:text]}?",
+      attachments: [
+        {
+          callback_id: "accept_response",
+          attachment_type: "default",
+          actions: [
+            {
+              "name": "accept_response",
+              "text": "Yep",
+              "type": "button",
+              "value": 'yes'
+            },
+            {
+              "name": "accept_response",
+              "text": "Nah",
+              "type": "button",
+              "value": 'no'
+            }
+          ]
+        }
+      ]
+    }.to_json
+  end
 end
 
 post '/actions-endpoint' do
