@@ -1,6 +1,15 @@
 require 'sinatra'
-require 'httparty'
 require 'json'
+require 'jbuilder'
+require './api'
+require './messages'
+
+slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
+
+# slack.test_api
+# resp = slack.list_channels
+# test_channel_id = resp["channels"].map {|channel| channel['id'] if channel['name']=='test'}.compact.first
+
 
 post '/gateway' do
   content_type :json
@@ -16,39 +25,31 @@ post '/gateway' do
       ]
     }.to_json
   else
-    {
-      response_type: "in_channel",
-      text: "You wanna get drinks #{params[:text]}?",
-      attachments: [
-        {
-          callback_id: "accept_response",
-          attachment_type: "default",
-          actions: [
-            {
-              "name": "accept_response",
-              "text": "Yep",
-              "type": "button",
-              "value": 'yes'
-            },
-            {
-              "name": "accept_response",
-              "text": "Nah",
-              "type": "button",
-              "value": 'no'
-            }
-          ]
-        }
-      ]
-    }.to_json
+    slack.post_message(Messages.drinks_request(params))
+    return nil
   end
 end
 
 post '/actions-endpoint' do
   content_type :json
-  response = JSON.parse(params[:payload])["actions"][0]["value"]
-  case JSON.parse(params[:payload])["actions"][0]["name"]
-  when 'accept_response'
-    response == "yes" ? 'Cool' : "Boo, you whore."
-  else "That hasn't been programmed yet."
+
+  payload = JSON.parse(params[:payload])
+  response = payload["actions"][0]["value"]
+  action = payload["actions"][0]["name"]
+  case action
+  when 'drinks_response'
+    if response == "yes"
+      slack.update_message(Messages.drinks_response(payload))
+      return nil
+    end
+  else
+    "That hasn't been programmed yet."
   end
 end
+
+# headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json'},
+# 'token': 'xoxb-169756502625-upP2EMgUaP6cj8CCs4oRfQbk',
+# 'ts': payload['ts'],
+# 'channel': payload['channel']['id'],
+# 'text': payload['original_message']['text'] + ' ' + payload['user']['name'] + ' is in.',
+# 'as_user': true
