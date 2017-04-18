@@ -13,21 +13,49 @@ class Slack
 
   def test_api
     self.class.post('/api.test').tap do |response|
-      puts "*********#{response}**********"
       raise "error: #{response.fetch('error')}" unless response['ok']
     end
   end
 
   def test_auth
     self.class.post('/auth.test').tap do |response|
-      puts "*********#{response}**********"
       raise "error: #{response.fetch('error')}" unless response['ok']
     end
   end
 
   def list_channels
     self.class.post('/channels.list', body: {token: @token}, options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
-      raise "error posting message: #{response.fetch('error', 'unknown error')}" unless response['ok']
+      raise "error listing channels: #{response.fetch('error', 'unknown error')}" unless response['ok']
+    end
+  end
+
+  def get_channel_info(params)
+    self.class.post('/channels.info', body: params.merge({token: @token}), options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
+      raise "error getting info: #{response.fetch('error', 'unknown error')}" unless response['ok']
+    end
+  end
+
+  def get_channel_members(params)
+    self.class.post('/channels.info', body: params.merge({token: @token}), options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
+      raise "error getting channel members: #{response.fetch('error', 'unknown error')}" unless response['ok']
+      return response["channel"]["members"]
+    end
+  end
+
+  def open_im_with_user(params)
+    self.class.post('/im.open', body: params.merge({token: @token}), options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
+      raise "error opening IM with user: #{response.fetch('error', 'unknown error')}" unless response['ok']
+    end
+  end
+
+  def list_im_channel_ids
+    self.class.post('/im.list', body: {token: @token}, options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
+      raise "error listing IM channels: #{response.fetch('error', 'unknown error')}" unless response['ok']
+      ids = []
+      response["ims"].each do |im|
+        ids << im["id"]
+      end
+      return ids
     end
   end
 

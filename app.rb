@@ -5,11 +5,7 @@ require './api'
 require './messages'
 
 slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
-
-# slack.test_api
-# resp = slack.list_channels
-# test_channel_id = resp["channels"].map {|channel| channel['id'] if channel['name']=='test'}.compact.first
-
+last_public_bot_message = nil
 
 post '/gateway' do
   content_type :json
@@ -25,7 +21,19 @@ post '/gateway' do
       ]
     }.to_json
   else
-    slack.post_message(Messages.drinks_request(params))
+    slack.get_channel_members({channel: params["channel_id"]}).each do |user_id|
+      payload = {
+        user: user_id,
+        return_im: "true"
+      }
+      slack.open_im_with_user(payload)
+    end
+    slack.list_im_channel_ids.each do |im_channel_id|
+      payload = {requester: params['user_name'], day: params["text"], channel: im_channel_id}
+      slack.post_message(Messages.private_drinks_request(payload))
+      nil
+    end
+    last_public_bot_message = slack.post_message(Messages.public_drinks_request(params))
     return nil
   end
 end
@@ -39,17 +47,18 @@ post '/actions-endpoint' do
   case action
   when 'drinks_response'
     if response == "yes"
-      slack.update_message(Messages.drinks_response(payload))
+      slack.update_message(Messages.private_drinks_acceptance_response(payload))
+      puts "*************#{last_public_bot_message}************"
+      new_message = {
+        channel: last_public_bot_message["channel"],
+        ts: last_public_bot_message["ts"],
+        title: last_public_bot_message["message"]["attachments"][0]["title"],
+        original_message: last_public_bot_message["message"]["attachments"][0]["text"]
+      }
+      last_public_bot_message = slack.update_message(Messages.public_drinks_acceptance_response(payload, new_message))
       return nil
     end
   else
     "That hasn't been programmed yet."
   end
 end
-
-# headers: { 'Content-Type' => 'application/json', 'Accept' => 'application/json'},
-# 'token': 'xoxb-169756502625-upP2EMgUaP6cj8CCs4oRfQbk',
-# 'ts': payload['ts'],
-# 'channel': payload['channel']['id'],
-# 'text': payload['original_message']['text'] + ' ' + payload['user']['name'] + ' is in.',
-# 'as_user': true
