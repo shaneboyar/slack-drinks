@@ -29,7 +29,7 @@ post '/gateway' do
       slack.open_im_with_user(payload)
     end
     slack.list_im_channel_ids.each do |im_channel_id|
-      payload = {requester: params['user_name'], day: params["text"], channel: im_channel_id}
+      payload = {requester: params['user_name'], day: params["text"], channel: im_channel_id} #FIX!!!
       slack.post_message(Messages.private_drinks_request(payload))
       nil
     end
@@ -47,8 +47,8 @@ post '/actions-endpoint' do
   case action
   when 'drinks_response'
     if response == "yes"
+      payload[:channel] = last_public_bot_message["channel"]
       slack.update_message(Messages.private_drinks_acceptance_response(payload))
-      puts "*************#{last_public_bot_message}************"
       new_message = {
         channel: last_public_bot_message["channel"],
         ts: last_public_bot_message["ts"],
@@ -56,6 +56,17 @@ post '/actions-endpoint' do
         original_message: last_public_bot_message["message"]["attachments"][0]["text"]
       }
       last_public_bot_message = slack.update_message(Messages.public_drinks_acceptance_response(payload, new_message))
+      return nil
+    elsif response == "no"
+      payload[:channel] = last_public_bot_message["channel"]
+      slack.update_message(Messages.private_drinks_denial_response(payload))
+      new_message = {
+        channel: last_public_bot_message["channel"],
+        ts: last_public_bot_message["ts"],
+        title: last_public_bot_message["message"]["attachments"][0]["title"],
+        original_message: last_public_bot_message["message"]["attachments"][0]["text"]
+      }
+      last_public_bot_message = slack.update_message(Messages.public_drinks_denial_response(payload, new_message))
       return nil
     end
   else

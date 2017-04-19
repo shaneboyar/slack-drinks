@@ -73,12 +73,53 @@ module Messages
     }
   end
 
-  def Messages.private_drinks_acceptance_response(payload)
+  def Messages.public_drinks_denial_response(payload, new_message)
+    updated_text = if new_message[:original_message] == "Check your private chat with @drinkbot to respond"
+      "<@#{payload["user"]["id"]}|#{payload["user"]["name"]}> can\'t make it."
+    else
+      new_message[:original_message] + " <@#{payload["user"]["id"]}|#{payload["user"]["name"]}> can\'t make it."
+    end
 
     attachments = [
       {
-        title: "Cool, I'll help you plan it.",
+        title: new_message[:title],
+        text: updated_text,
         color: "#7CD197",
+        attachment_type: "default"
+      }
+    ].to_json
+
+    drinks_response = {
+      channel: new_message[:channel],
+      ts: new_message[:ts],
+      attachments: attachments,
+      as_user: "true"
+    }
+  end
+
+  def Messages.private_drinks_acceptance_response(payload)
+    attachments = [
+      {
+        title: "Cool, I'll help you plan it. Head back to <##{payload[:channel]}>",
+        color: "#7CD197",
+        attachment_type: "default"
+      }
+    ].to_json
+
+    drinks_response = {
+      channel: payload["channel"]["id"],
+      ts: payload["original_message"]["ts"],
+      attachments: attachments,
+      as_user: "true"
+    }
+  end
+
+  def Messages.private_drinks_denial_response(payload)
+    attachments = [
+      {
+        title: "Ugh.",
+        image_url: "https://media.tenor.co/images/1e88d8430b51b56de7c910f7aa2ce212/tenor.gif",
+        color: "#CE2929",
         attachment_type: "default"
       }
     ].to_json
