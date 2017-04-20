@@ -48,12 +48,12 @@ class Slack
     end
   end
 
-  def list_im_channel_ids
+  def list_im_channel_ids(user_ids)
     self.class.post('/im.list', body: {token: @token}, options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
       raise "error listing IM channels: #{response.fetch('error', 'unknown error')}" unless response['ok']
       ids = []
       response["ims"].each do |im|
-        ids << im["id"]
+        ids << im["id"] if user_ids.include?(im["user"])
       end
       return ids
     end

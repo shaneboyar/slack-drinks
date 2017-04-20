@@ -21,14 +21,14 @@ post '/gateway' do
       ]
     }.to_json
   else
-    slack.get_channel_members({channel: params["channel_id"]}).each do |user_id|
+    channel_member_ids = slack.get_channel_members({channel: params["channel_id"]}).each do |user_id|
       payload = {
         user: user_id,
         return_im: "true"
       }
       slack.open_im_with_user(payload)
     end
-    slack.list_im_channel_ids.each do |im_channel_id|
+    slack.list_im_channel_ids(channel_member_ids).each do |im_channel_id|
       payload = {requester: params['user_name'], day: params["text"], channel: im_channel_id} #FIX!!!
       slack.post_message(Messages.private_drinks_request(payload))
       nil
