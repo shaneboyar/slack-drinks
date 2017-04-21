@@ -5,8 +5,10 @@ require './drinkbot'
 require './messages'
 
 slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
-last_public_bot_message = nil
 drinkbot = nil
+
+google = Google.new("AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk")
+place_details = nil
 
 iggys_by_location_payload = HTTParty.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7213411,-73.9888796&rankby=distance&type=bar&name=iggys&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk')
 iggys_place_id = iggys_by_location_payload["results"][0]["place_id"]
@@ -30,7 +32,15 @@ post '/gateway' do
   else
     drinkbot.open_im_channels
     drinkbot.send_initial_ims
-    last_public_bot_message = drinkbot.post_initial_message
+    initial_message = drinkbot.post_initial_message
+
+    # Refactor into DrinkBot Method
+    request_location = params["text"].split(' ').drop(1).join("+")
+    resp = google.geocode(request_location)
+    location = resp["results"][0]["geometry"]["location"]
+    bars = google.get_nearest_bars(location)
+    place_id = bars["results"][0]["place_id"]
+    place_details = google.get_place_details(place_id)
     nil
   end
 end
@@ -49,7 +59,7 @@ post '/actions-endpoint' do
   when 'drinks_response'
       drinkbot.update_initial_im(payload, response)
       drinkbot.update_initial_message(responder, response)
-      drinkbot.post_location_suggestion(location) if response == "yes"
+      drinkbot.post_location_suggestion(place_details) if response == "yes"
       return nil
   else
     "That hasn't been programmed yet."

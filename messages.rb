@@ -3,7 +3,7 @@ module Messages
   def Messages.public_drinks_request(params)
     attachments = [
       {
-        title: "#{params['user_name']} wants to get drinks #{params["text"]}",
+        title: "#{params['user_name']} wants to get drinks #{params["text"].split(' ')[0]}",
         text: "Check your private chat with @drinkbot to respond",
         color: "#7CD197",
         attachment_type: "default"

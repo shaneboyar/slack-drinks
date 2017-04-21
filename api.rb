@@ -1,6 +1,34 @@
 require 'httparty'
 require 'json'
 
+class Google
+  include HTTParty
+  base_uri 'https://maps.googleapis.com/maps/api'
+  debug_output
+
+  def initialize(key)
+    @key = key
+  end
+
+  def geocode(address)
+    self.class.get("/geocode/json?address=#{address}&key=#{@key}").tap do |response|
+      raise "error #{response["error_message"]}" unless response["status"] == "OK"
+    end
+  end
+
+  def get_nearest_bars(geocoded_location)
+    self.class.get("/place/nearbysearch/json?location=#{geocoded_location["lat"]},#{geocoded_location["lng"]}&rankby=distance&type=bar&key=#{@key}").tap do |response|
+      raise "error #{response["error_message"]}" unless response["status"] == "OK"
+    end
+  end
+
+  def get_place_details(place_id)
+    self.class.get("/place/details/json?placeid=#{place_id}&key=#{@key}").tap do |response|
+      raise "error #{response["error_message"]}" unless response["status"] == "OK"
+    end
+  end
+end
+
 
 class Slack
   include HTTParty

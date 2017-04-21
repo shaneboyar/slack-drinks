@@ -8,7 +8,7 @@ class Drinkbot
     @slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
     @initial_params = initial_params
     @requester = initial_params[:user_name]
-    @day = initial_params[:text]
+    @day = initial_params[:text].split(" ")[0]
     @request_room_id = initial_params["channel_id"]
     @request_room_name = initial_params["channel_name"]
     @friend_ids = @slack.get_channel_members({channel: initial_params["channel_id"]}) # Need to filter out inactive members
@@ -58,6 +58,7 @@ class Drinkbot
   end
 
   def update_initial_message(responder, response)
+    puts "*****************#{@initial_message}*************"
     old_message = {
         channel: @initial_message["channel"],
         ts: @initial_message["ts"],
