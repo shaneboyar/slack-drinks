@@ -3,15 +3,33 @@ module Messages
   def Messages.public_drinks_request(params)
     attachments = [
       {
-          title: "#{params['user_name']} wants to get drinks #{params["text"]}",
-          text: "Check your private chat with @drinkbot to respond",
-          color: "#7CD197",
-          attachment_type: "default"
+        title: "#{params['user_name']} wants to get drinks #{params["text"]}",
+        text: "Check your private chat with @drinkbot to respond",
+        color: "#7CD197",
+        attachment_type: "default"
       }
     ].to_json
 
     drinks_request = {
       channel: params["channel_id"],
+      attachments: attachments
+    }
+  end
+
+  def Messages.public_location_suggestion(params)
+    attachments = [
+      {
+        fallback: 'Wanna go here?',
+        pretext: 'Wanna go here?',
+        color: "#36a64f",
+        title: params["result"]["name"],
+        title_link: params["result"]["url"],
+        text: params["result"]["vicinity"],
+        image_url: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{params["result"]["photos"][0]["photo_reference"]}&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk"
+      }
+    ].to_json
+    location_suggestion = {
+      channel: params[:channel_id],
       attachments: attachments
     }
   end

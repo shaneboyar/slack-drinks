@@ -1,11 +1,14 @@
 require 'sinatra'
 require 'json'
-require 'jbuilder'
 require './api'
 require './messages'
 
 slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
 last_public_bot_message = nil
+
+iggys_by_location_payload = HTTParty.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7213411,-73.9888796&rankby=distance&type=bar&name=iggys&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk')
+iggys_place_id = iggys_by_location_payload["results"][0]["place_id"]
+iggys_detail_payload = HTTParty.get("https://maps.googleapis.com/maps/api/place/details/json?placeid=#{iggys_place_id}&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk")
 
 post '/gateway' do
   content_type :json
@@ -30,7 +33,7 @@ post '/gateway' do
     end
     slack.list_im_channel_ids(channel_member_ids).each do |im_channel_id|
       payload = {requester: params['user_name'], day: params["text"], channel: im_channel_id} #FIX!!!
-      slack.post_message(Messages.private_drinks_request(payload))
+      resp = slack.post_message(Messages.private_drinks_request(payload))
       nil
     end
     last_public_bot_message = slack.post_message(Messages.public_drinks_request(params))
@@ -56,6 +59,8 @@ post '/actions-endpoint' do
         original_message: last_public_bot_message["message"]["attachments"][0]["text"]
       }
       last_public_bot_message = slack.update_message(Messages.public_drinks_acceptance_response(payload, new_message))
+      params = iggys_detail_payload.merge({channel_id: last_public_bot_message["channel"]})
+      slack.post_message(Messages.public_location_suggestion(params))
       return nil
     elsif response == "no"
       payload[:channel] = last_public_bot_message["channel"]
