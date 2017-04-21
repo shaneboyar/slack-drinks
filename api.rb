@@ -99,6 +99,13 @@ class Slack
     end
   end
 
+  # BROKED
+  # def upload_file(params)
+  #   self.class.post('/files.upload', body: params.merge({token: @token}), options: {headers: {'Content-Type': 'application/json'}}).tap do |response|
+  #     raise "error updloading file: #{response.fetch('error', 'unknown error')}" unless response['ok']
+  #   end
+  # end
+
   def debug
     puts "I'm Here!"
   end

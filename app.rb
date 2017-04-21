@@ -10,10 +10,6 @@ drinkbot = nil
 google = Google.new("AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk")
 place_details = nil
 
-iggys_by_location_payload = HTTParty.get('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=40.7213411,-73.9888796&rankby=distance&type=bar&name=iggys&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk')
-iggys_place_id = iggys_by_location_payload["results"][0]["place_id"]
-location = HTTParty.get("https://maps.googleapis.com/maps/api/place/details/json?placeid=#{iggys_place_id}&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk")
-
 post '/gateway' do
   content_type :json
   drinkbot = Drinkbot.new(params)

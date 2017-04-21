@@ -58,7 +58,6 @@ class Drinkbot
   end
 
   def update_initial_message(responder, response)
-    puts "*****************#{@initial_message}*************"
     old_message = {
         channel: @initial_message["channel"],
         ts: @initial_message["ts"],
@@ -75,6 +74,10 @@ class Drinkbot
   def post_location_suggestion(location)
     params = location.merge({channel_id: @request_room_id})
     @slack.post_message(Messages.public_location_suggestion(params))
+  end
+
+  def upload_cal_event # THIS SUCKS!
+    system("curl -F file=@cal.ics -F channels=#{@im_channel_ids.join(",")} -F token=xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK https://slack.com/api/files.upload")
   end
 
 
