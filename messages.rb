@@ -67,11 +67,11 @@ module Messages
     }
   end
 
-  def Messages.public_drinks_acceptance_response(payload, new_message)
-    updated_text = if new_message[:original_message] == "Check your private chat with @drinkbot to respond"
-      "<@#{payload["user"]["id"]}|#{payload["user"]["name"]}> is down."
+  def Messages.public_drinks_acceptance_response(responder, new_message)
+    updated_text = if new_message[:original_message_text] == "Check your private chat with @drinkbot to respond"
+      "<@#{responder["id"]}|#{responder["name"]}> is down."
     else
-      new_message[:original_message] + " <@#{payload["user"]["id"]}|#{payload["user"]["name"]}> is down."
+      new_message[:original_message_text] + " <@#{responder["id"]}|#{responder["name"]}> is down."
     end
 
     attachments = [
@@ -91,16 +91,16 @@ module Messages
     }
   end
 
-  def Messages.public_drinks_denial_response(payload, new_message)
-    updated_text = if new_message[:original_message] == "Check your private chat with @drinkbot to respond"
-      "<@#{payload["user"]["id"]}|#{payload["user"]["name"]}> can\'t make it."
+  def Messages.public_drinks_denial_response(responder, old_message)
+    updated_text = if old_message[:original_message_text] == "Check your private chat with @drinkbot to respond"
+      "<@#{responder["id"]}|#{responder["name"]}> can\'t make it."
     else
-      new_message[:original_message] + " <@#{payload["user"]["id"]}|#{payload["user"]["name"]}> can\'t make it."
+      old_message[:original_message_text] + " <@#{responder["id"]}|#{responder["name"]}> can\'t make it."
     end
 
     attachments = [
       {
-        title: new_message[:title],
+        title: old_message[:title],
         text: updated_text,
         color: "#7CD197",
         attachment_type: "default"
@@ -108,8 +108,8 @@ module Messages
     ].to_json
 
     drinks_response = {
-      channel: new_message[:channel],
-      ts: new_message[:ts],
+      channel: old_message[:channel],
+      ts: old_message[:ts],
       attachments: attachments,
       as_user: "true"
     }
