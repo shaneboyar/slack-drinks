@@ -24,11 +24,17 @@ class Drinkbot
   end
 
   def send_initial_ims
+    @timestamps = []
     @im_channel_ids.each do |im_channel_id|
       payload = {requester: @requester, day: @day, channel: im_channel_id}
       resp = @slack.post_message(Messages.private_drinks_request(payload))
-      nil
+      @timestamps << resp["ts"]
     end
+    @timestamps
+  end
+
+  def response_out_of_date?(payload)
+    !@timestamps.include?(payload["message_ts"])
   end
 
   def update_initial_im(payload, response)

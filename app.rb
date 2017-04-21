@@ -43,6 +43,8 @@ post '/actions-endpoint' do
   action = payload["actions"][0]["name"]
   responder = payload["user"]
 
+  return "This request for hangs is out of date" if drinkbot.response_out_of_date?(payload)
+
   case action
   when 'drinks_response'
       drinkbot.update_initial_im(payload, response)
