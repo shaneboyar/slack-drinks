@@ -1,14 +1,17 @@
+require 'chronic'
+require 'icalendar'
 require 'json'
 require './api'
 require './messages'
 
 class Drinkbot
+  attr_reader :day
 
   def initialize(initial_params)
     @slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
     @initial_params = initial_params
     @requester = initial_params[:user_name]
-    @day = initial_params[:text].split(" ")[0]
+    @day = initial_params[:text].split(" at ")[0]
     @request_room_id = initial_params["channel_id"]
     @request_room_name = initial_params["channel_name"]
     @friend_ids = @slack.get_channel_members({channel: initial_params["channel_id"]}) # Need to filter out inactive members
@@ -76,9 +79,24 @@ class Drinkbot
     @slack.post_message(Messages.public_location_suggestion(params))
   end
 
+  def create_cal_event(time, place)
+    time = Chronic.parse(time)
+    place_name = place["result"]["name"]
+    cal = Icalendar::Calendar.new
+    cal.event do |event|
+      event.dtstart = DateTime.civil(time.year, time.month, time.day, time.hour, time.min)
+      event.summary     = "Drinks at #{place_name}"
+      event.description = "address is here....."
+    end
+    cal.publish
+    file = File.new("./cal.ics", "w+")
+    file.write(cal.to_ical)
+    file.close
+  end
+
   def upload_cal_event # THIS SUCKS!
     system("curl -F file=@cal.ics -F channels=#{@im_channel_ids.join(",")} -F token=xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK https://slack.com/api/files.upload")
-    # File.delete('./cal.ics')
+    File.delete('./cal.ics')
   end
 
 

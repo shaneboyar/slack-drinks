@@ -3,7 +3,7 @@ module Messages
   def Messages.public_drinks_request(params)
     attachments = [
       {
-        title: "#{params['user_name']} wants to get drinks #{params["text"].split(' ')[0]}",
+        title: "#{params['user_name']} wants to get drinks #{params["text"].split(' at ')[0]}",
         text: "Check your private chat with @drinkbot to respond",
         color: "#7CD197",
         attachment_type: "default"
@@ -16,7 +16,29 @@ module Messages
     }
   end
 
+  # def Messages.no_locations_found(initial_requester_im_id)
+  #   drinks_request = {
+  #     channel: initial_requester_im_id,
+  #     text: "Sorry, I couldn't find a bar that matches your request"
+  #   }
+  # end
+
   def Messages.public_location_suggestion(params)
+    actions = [
+      {
+        name: "location_response",
+        text: "Yes",
+        type: "button",
+        value: "yes"
+      },
+      {
+        name: "location_response",
+        text: "Nah",
+        type: "button",
+        value: "no"
+      }
+    ]
+
     attachments = [
       {
         fallback: 'Wanna go here?',
@@ -25,9 +47,12 @@ module Messages
         title: params["result"]["name"],
         title_link: params["result"]["url"],
         text: params["result"]["vicinity"],
-        image_url: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{params["result"]["photos"][0]["photo_reference"]}&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk"
+        image_url: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{params["result"]["photos"][0]["photo_reference"]}&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk",
+        callback_id: "location_response",
+        actions: actions
       }
     ].to_json
+
     location_suggestion = {
       channel: params[:channel_id],
       attachments: attachments
