@@ -78,6 +78,7 @@ class Drinkbot
 
   def upload_cal_event # THIS SUCKS!
     system("curl -F file=@cal.ics -F channels=#{@im_channel_ids.join(",")} -F token=xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK https://slack.com/api/files.upload")
+    # File.delete('./cal.ics')
   end
 
 

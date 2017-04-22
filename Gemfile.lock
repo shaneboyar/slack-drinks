@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    chronic (0.10.2)
     httparty (0.14.0)
       multi_xml (>= 0.5.2)
     icalendar (2.4.1)
@@ -18,6 +19,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  chronic
   httparty
   icalendar
   sinatra
