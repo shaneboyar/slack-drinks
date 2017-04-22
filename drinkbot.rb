@@ -6,6 +6,7 @@ require './messages'
 
 class Drinkbot
   attr_reader :day
+  attr_reader :initial_request_responses
 
   def initialize(initial_params)
     @slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
@@ -17,6 +18,7 @@ class Drinkbot
     @friend_ids = @slack.get_channel_members({channel: initial_params["channel_id"]}) # Need to filter out inactive members
     @initial_message = nil
     @im_channel_ids = []
+    @initial_request_responses = []
   end
 
   def open_im_channels
@@ -73,6 +75,11 @@ class Drinkbot
       set_initial_message(@slack.update_message(Messages.public_drinks_denial_response(responder, old_message)))
     end
   end
+
+  def capture_initial_request_responses(payload)
+    @initial_request_responses << payload
+  end
+
 
   def post_location_suggestion(location)
     params = location.merge({channel_id: @request_room_id})

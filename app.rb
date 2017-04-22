@@ -52,16 +52,18 @@ post '/actions-endpoint' do
   content_type :json
 
   payload = JSON.parse(params[:payload])
+  drinkbot.capture_initial_request_responses(payload)
   response = payload["actions"][0]["value"]
   action = payload["actions"][0]["name"]
   responder = payload["user"]
+
 
   case action
   when 'drinks_response'
     return "This request for hangs is out of date" if drinkbot.response_out_of_date?(payload)
     drinkbot.update_initial_im(payload, response)
     drinkbot.update_initial_message(responder, response)
-    drinkbot.post_location_suggestion(place_details) if response == "yes"
+    drinkbot.post_location_suggestion(place_details) if response == "yes" && drinkbot.initial_request_responses.count < 1
     200
   when 'location_response'
     drinkbot.create_cal_event(drinkbot.day, place_details)
