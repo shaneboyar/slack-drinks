@@ -48,7 +48,7 @@ module Messages
         title_link: params["result"]["url"],
         text: params["result"]["vicinity"],
         image_url: "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=#{params["result"]["photos"][0]["photo_reference"]}&key=AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk",
-        callback_id: "location_response",
+        callback_id: params[:callback_id],
         actions: actions
       }
     ].to_json
@@ -81,7 +81,7 @@ module Messages
           text: "You down?",
           color: "#7CD197",
           attachment_type: "default",
-          callback_id: "drinks_response",
+          callback_id: payload[:callback_id],
           actions: actions
       }
     ].to_json

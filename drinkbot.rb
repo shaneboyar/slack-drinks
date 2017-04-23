@@ -5,10 +5,17 @@ require './api'
 require './messages'
 
 class Drinkbot
+  @@array = Array.new
   attr_reader :day
   attr_reader :initial_request_responses
+  attr_reader :id
+
+  def self.all_instances
+    @@array
+  end
 
   def initialize(initial_params)
+    @id = Time.now.to_i
     @slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
     @initial_params = initial_params
     @requester = initial_params[:user_name]
@@ -19,6 +26,7 @@ class Drinkbot
     @initial_message = nil
     @im_channel_ids = []
     @initial_request_responses = []
+    @@array << self
   end
 
   def open_im_channels
@@ -31,7 +39,7 @@ class Drinkbot
   def send_initial_ims
     @timestamps = []
     @im_channel_ids.each do |im_channel_id|
-      payload = {requester: @requester, day: @day, channel: im_channel_id}
+      payload = {requester: @requester, day: @day, channel: im_channel_id, callback_id: @id}
       resp = @slack.post_message(Messages.private_drinks_request(payload))
       @timestamps << resp["ts"]
     end
@@ -82,7 +90,7 @@ class Drinkbot
 
 
   def post_location_suggestion(location)
-    params = location.merge({channel_id: @request_room_id})
+    params = location.merge({channel_id: @request_room_id, callback_id: @id})
     @slack.post_message(Messages.public_location_suggestion(params))
   end
 
