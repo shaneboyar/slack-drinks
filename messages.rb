@@ -1,5 +1,17 @@
 module Messages
 
+  def Messages.ephemeral_help_response
+    {
+      response_type: "ephemeral",
+      text: "How to use /drinks",
+      attachments: [
+        {
+          text: "To start planning drinks type `/drinks` followed by when you'd like to get drinks (e.g. `/drinks tonight` or `/drinks this friday`"
+        }
+      ]
+    }.to_json
+  end
+
   def Messages.public_drinks_request(params)
     attachments = [
       {

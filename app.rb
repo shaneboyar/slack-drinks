@@ -19,15 +19,7 @@ post '/gateway' do
   active_drinkbots["#{drinkbot.id}"] = drinkbot
   case params[:text]
   when 'help'
-    {
-      response_type: "ephemeral",
-      text: "How to use /drinks",
-      attachments: [
-        {
-          text: "To start planning drinks type `/drinks` followed by when you'd like to get drinks (e.g. `/drinks tonight` or `/drinks this friday`"
-        }
-      ]
-    }.to_json
+    Messages.ephemeral_help_response
   else
     # Refactor into DrinkBot Method
     place_details = nil
@@ -68,13 +60,13 @@ post '/actions-endpoint' do
     drinkbot.capture_initial_request_responses(payload)
     drinkbot.update_initial_im(payload, response)
     drinkbot.update_initial_message(responder, response)
-    drinkbot.post_location_suggestion(place_details) if response == "yes" && drinkbot.initial_request_responses.count <= 1
+    drinkbot.post_location_suggestion(place_details) if response == "yes" && drinkbot.initial_request_responses.count == 1
     200
   when 'location_response'
     drinkbot.create_cal_event(drinkbot.day, place_details)
     drinkbot.upload_cal_event
     active_drinkbots.delete("#{payload["callback_id"]}")
-    puts "\n\n\n\n\n\n\n\n***************#{active_drinkbots}"
+    puts "\n\n\n\n\n\n\n\n***************#{active_drinkbots.count}"
     200
   else
     "That hasn't been programmed yet."
