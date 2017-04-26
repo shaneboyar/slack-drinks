@@ -3,6 +3,7 @@ require 'icalendar'
 require 'json'
 require './api'
 require './messages'
+require 'dotenv/load'
 
 class Drinkbot
   @@array = Array.new
@@ -16,7 +17,7 @@ class Drinkbot
 
   def initialize(initial_params)
     @id = Time.now.to_i
-    @slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
+    @slack = Slack.new(ENV['SLACK_API_TOKEN'])
     @initial_params = initial_params
     @requester = initial_params[:user_name]
     @day = initial_params[:text].split(" at ")[0]
@@ -110,7 +111,7 @@ class Drinkbot
   end
 
   def upload_cal_event # THIS SUCKS!
-    system("curl -F file=@cal.ics -F channels=#{@im_channel_ids.join(",")} -F token=xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK https://slack.com/api/files.upload")
+    system("curl -F file=@cal.ics -F channels=#{@im_channel_ids.join(",")} -F token=#{ENV['SLACK_API_TOKEN']} https://slack.com/api/files.upload")
     File.delete('./cal.ics')
   end
 
