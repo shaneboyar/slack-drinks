@@ -1,5 +1,6 @@
 require 'json'
 require 'sinatra'
+require 'dotenv/load'
 require './api'
 require './drinkbot'
 require './messages'
@@ -7,8 +8,8 @@ require './messages'
 
 enable :sessions
 
-slack = Slack.new("xoxb-169744296672-Rwk78bwajqgD0tjGE0w28XGK")
-google = Google.new("AIzaSyCc_VAlXcj_ZsJvw3sIDWJSVkuDKChsMbk")
+slack = Slack.new(ENV["SLACK_API_TOKEN"])
+google = Google.new(ENV["GOOGLE_API_TOKEN"])
 
 place_details = nil
 active_drinkbots = {}
